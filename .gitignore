@@ -1,0 +1,48 @@
+# Entornos virtuales de Python
+.venv/
+venv/
+env/
+ENV/
+.virtualenv/
+
+# Variables de entorno y secretos locales
+.env
+.env.*
+!.env.example
+
+# Cachés y archivos compilados de Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.tox/
+.nox/
+
+# Paquetes y artefactos de compilación
+*.egg-info/
+*.egg
+.eggs/
+build/
+dist/
+
+# Dependencias y cachés de Node.js / React / Vite
+node_modules/
+.npm/
+.vite/
+.eslintcache
+*.tsbuildinfo
+
+# Cobertura de pruebas
+.coverage
+.coverage.*
+htmlcov/
+coverage/
+coverage.xml
+
+# Cachés, logs y archivos del sistema
+.cache/
+*.log
+.DS_Store
+Thumbs.db
