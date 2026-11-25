@@ -1,7 +1,8 @@
 # TechService — Contrato inicial de API REST
 
-**Estado:** diseño aprobado, endpoints aún no implementados  
-**Fecha:** 2026-11-18 · **Versión:** 0.1
+**Estado:** clientes y `/health` implementados. Los demás recursos siguen en diseño.
+
+**Fecha:** 2026-11-25 · **Versión:** 0.2
 
 ## 1. Convenciones
 
@@ -39,9 +40,22 @@ Fuera del prefijo funcional, `GET /health` verifica que la aplicación HTTP resp
 ## 3. Campos y reglas esenciales
 
 ### Customer
-- Crear: `name`, `phone` requeridos; `email` opcional.
-- Actualizar: subconjunto de campos editables; rechazar vacíos en campos obligatorios.
-- Responder con `id` y campos pertinentes, sin exponer datos de otras entidades automáticamente.
+
+Las cuatro rutas de clientes están temporalmente abiertas sin autenticación. Utiliza solo datos ficticios en desarrollo mientras se implementa la sesión.
+
+| Petición | Respuesta |
+|---|---|
+| `POST /api/v1/customers` | `201` con el cliente creado |
+| `GET /api/v1/customers` | `200` con una lista JSON de clientes, incluso si está vacía (`[]`) |
+| `GET /api/v1/customers/{id}` | `200` con el cliente o `404` si no existe |
+| `PATCH /api/v1/customers/{id}` | `200` con el cliente actualizado o `404` si no existe |
+
+Cada cliente se representa con `id`, `name`, `phone` y `email`. PostgreSQL genera el ID. El parámetro de ruta acepta enteros de 1 a 9223372036854775807.
+
+- Para crear un cliente, envía `name` (1–120 caracteres) y `phone` (1–30, como texto). Se recortan los espacios exteriores y se rechaza el texto vacío. El correo es opcional, admite `null` y, si se proporciona, debe ser válido y tener como máximo 254 caracteres. Se admiten teléfonos y correos compartidos.
+- En un `PATCH`, cada campo omitido conserva su valor. Por ejemplo, `{"email":null}` borra el correo y conserva nombre y teléfono. Un objeto vacío (`{}`) devuelve el cliente sin cambios. Proporcionar `null` en `name` o `phone` devuelve `422`.
+- Ambos cuerpos de escritura rechazan con `422` el campo `id`, los campos desconocidos y los valores inválidos. Los parámetros de ruta o paginación fuera de rango también devuelven `422`.
+- El listado se ordena por `id` ascendente. `limit` admite de 1 a 100 y por defecto vale 20. `offset` admite de 0 a 9223372036854775807 y por defecto vale 0. La respuesta es un array sin total.
 
 ### Device
 - Crear: `customer_id`, `device_type` requeridos; `brand`, `model`, `serial_number` opcionales.
@@ -101,4 +115,4 @@ Se utilizará el formato estándar de errores de FastAPI (`detail`) inicialmente
 
 ## 6. Asuntos intencionadamente diferidos
 
-No existe aún un estándar cerrado para la estructura de metadatos de las listas paginadas (por ejemplo, lista simple frente a `items` + `total`), el payload exacto de login ni los detalles del token CSRF. Se definirán al implementar las primeras funciones que los requieran y se registrarán antes de consumirlos desde React. **No son decisiones de stack pendientes ni bloquean `/health`.**
+El listado de clientes usa una lista simple. El cuerpo de login y los detalles del token CSRF se definirán al implementar autenticación.

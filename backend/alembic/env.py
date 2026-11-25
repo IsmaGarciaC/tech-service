@@ -1,10 +1,11 @@
 from logging.config import fileConfig
 
-from sqlalchemy import create_engine, pool
+from sqlalchemy import Connection, create_engine, pool
 
 from alembic import context
 from app.core.config import Settings
 from app.core.database import Base, database_url
+from app.modules.customers import models  # noqa: F401 - register customers in metadata
 
 config = context.config
 if config.config_file_name is not None:
@@ -25,11 +26,19 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    engine = create_engine(database_url(Settings()), poolclass=pool.NullPool)
-    with engine.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
-        with context.begin_transaction():
-            context.run_migrations()
+    connection = config.attributes.get("connection")
+    if connection is None:
+        engine = create_engine(database_url(Settings()), poolclass=pool.NullPool)
+        with engine.connect() as connection:
+            run_on_connection(connection)
+    else:
+        run_on_connection(connection)
+
+
+def run_on_connection(connection: Connection) -> None:
+    context.configure(connection=connection, target_metadata=target_metadata)
+    with context.begin_transaction():
+        context.run_migrations()
 
 
 if context.is_offline_mode():

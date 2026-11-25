@@ -1,6 +1,6 @@
 # TechService
 
-TechService es una aplicación web en desarrollo para pequeños talleres de reparación de computadoras. El backend FastAPI expone `GET /health`, valida los datos de entrada de clientes con Pydantic y dispone de sesiones SQLAlchemy y de Alembic para PostgreSQL. Los modelos ORM, las migraciones de negocio, las rutas de clientes y el frontend están pendientes.
+TechService es una aplicación web en desarrollo para pequeños talleres de reparación de computadoras. El backend FastAPI permite registrar, listar, consultar y actualizar clientes en PostgreSQL bajo `/api/v1/customers`. Estas rutas son temporalmente accesibles sin autenticación. En desarrollo, utiliza solo datos ficticios. Consulta los cuerpos, códigos de respuesta y reglas de paginación en el [contrato REST](docs/api.md#customer).
 
 ## Instalar y ejecutar el backend
 
@@ -33,21 +33,14 @@ docker compose config --quiet
 docker compose up -d --no-recreate db
 ```
 
-Cuando PostgreSQL esté listo, comprueba la conexión y la revisión actual desde `backend/` con el entorno virtual activo.
+Para habilitar las rutas de clientes en una instalación nueva, aplica la migración desde `backend/` con el entorno virtual activo y PostgreSQL listo.
 
 ```sh
-python - <<'PY'
-from sqlalchemy import text
-from app.core.database import get_session_factory
-
-session_factory = get_session_factory()
-with session_factory() as session:
-    print(session.scalar(text("SELECT 1")))
-PY
+python -m alembic upgrade head
 python -m alembic current
 ```
 
-La consulta debe imprimir `1`. En una base nueva, `alembic current` indica que usa PostgreSQL y termina sin listar una revisión.
+La primera revisión, `f511a0394d3e`, crea la tabla `customers`. Con la API en ejecución puedes consultar `curl -fsS http://127.0.0.1:8000/api/v1/customers`. Una base recién migrada devuelve `[]`.
 
 ## Modelos, sesiones y migraciones
 
@@ -63,7 +56,16 @@ Las rutas que necesiten persistencia pueden usar `Depends(get_db)`. Cada petici�
 
 ## Comprobar el backend
 
-Ejecuta los controles desde `backend/` con el entorno virtual activo.
+Para las pruebas de integración, arranca una instancia desechable en el puerto local 55432. El contenedor usa memoria temporal, admite conexiones locales sin contraseña y es independiente del servicio de desarrollo. Espera a que `pg_isready` indique que acepta conexiones.
+
+```sh
+docker run -d --rm --name techservice-pg-test --tmpfs /var/lib/postgresql \
+  -p 127.0.0.1:55432:5432 -e POSTGRES_HOST_AUTH_METHOD=trust postgres:18
+docker exec techservice-pg-test pg_isready -U postgres -h 127.0.0.1
+export TEST_POSTGRES_ADMIN_URL=postgresql+psycopg://postgres@127.0.0.1:55432/postgres
+```
+
+Ejecuta los controles desde `backend/` con el entorno virtual activo. Cada prueba de integración crea una base con nombre aleatorio en esa instancia, aplica Alembic y elimina solo su propia base al terminar. El rol de pruebas necesita permiso `CREATEDB`.
 
 ```sh
 python -m ruff check .
@@ -72,7 +74,7 @@ python -m pip check
 python -m pytest -q
 ```
 
-La suite se ejecuta sin PostgreSQL y sin un archivo `.env`. La comprobación de conexión real se ejecuta por separado con los comandos de la sección de PostgreSQL.
+La suite comprueba también `upgrade head`, `alembic check`, `downgrade base` y la reaplicación. Al terminar, detén el contenedor con `docker stop techservice-pg-test`. Para ejecutar únicamente las pruebas unitarias sin PostgreSQL, usa `python -m pytest -q --ignore=tests/integration`.
 
 ## Documentación de diseño
 

@@ -1,7 +1,8 @@
 # TechService — Modelo de datos
 
-**Estado:** esquema lógico aprobado, no migrado ni implementado  
-**Fecha:** 2026-11-18 · **Versión:** 0.1
+**Estado:** esquema lógico aprobado. La revisión `f511a0394d3e` implementa `customers`. Las demás tablas siguen en diseño.
+
+**Fecha:** 2026-11-25 · **Versión:** 0.2
 
 ## 1. Relaciones
 
@@ -89,4 +90,4 @@ La forma exacta del token, los nombres/longitudes de columnas auxiliares de sesi
 7. Entrega guarda `delivered_at`; órdenes entregadas visibles en historial.
 8. Sin borrado en cascada y sin transferencia de equipo mediante API.
 
-Este documento fija el modelo lógico; las migraciones Alembic se crearán durante el desarrollo, no ahora.
+Este documento fija el modelo lógico. Las revisiones de Alembic en `backend/alembic/versions/` registran el esquema implementado.
