@@ -25,7 +25,7 @@ def database_url(settings: Settings) -> URL:
 @cache
 def get_session_factory() -> sessionmaker[Session]:
     engine = create_engine(database_url(Settings()))
-    return sessionmaker(bind=engine)
+    return sessionmaker(bind=engine, expire_on_commit=False)
 
 
 def get_db() -> Iterator[Session]:
