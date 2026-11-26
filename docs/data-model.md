@@ -1,8 +1,8 @@
 # TechService — Modelo de datos
 
-**Estado:** esquema lógico aprobado. La revisión `f511a0394d3e` implementa `customers`. Las demás tablas siguen en diseño.
+**Estado:** la revisión `f511a0394d3e` implementa `customers` y la revisión incremental `2c997572e58f` implementa `devices`. Las demás tablas siguen en diseño.
 
-**Fecha:** 2026-11-25 · **Versión:** 0.2
+**Fecha:** 2026-11-25 · **Versión:** 0.3
 
 ## 1. Relaciones
 
@@ -30,7 +30,7 @@ Ni `phone` ni `email` son únicos globalmente. El nombre no se usa como clave na
 | Columna | Tipo PostgreSQL | Regla |
 |---|---|---|
 | `id` | BIGINT | PK, identidad generada por BD |
-| `customer_id` | BIGINT | FK NOT NULL → `customers.id` |
+| `customer_id` | BIGINT | FK NOT NULL → `customers.id`, con índice. La FK impide borrar un cliente con equipos. |
 | `device_type` | VARCHAR(50) | NOT NULL; no vacío |
 | `brand` | VARCHAR(80) | NULL |
 | `model` | VARCHAR(120) | NULL |

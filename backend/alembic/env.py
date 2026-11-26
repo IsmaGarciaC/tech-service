@@ -5,7 +5,8 @@ from sqlalchemy import Connection, create_engine, pool
 from alembic import context
 from app.core.config import Settings
 from app.core.database import Base, database_url
-from app.modules.customers import models  # noqa: F401 - register customers in metadata
+from app.modules.customers.models import Customer  # noqa: F401 - register in metadata
+from app.modules.devices.models import Device  # noqa: F401 - register in metadata
 
 config = context.config
 if config.config_file_name is not None:

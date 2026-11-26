@@ -1,8 +1,8 @@
 # TechService — Contrato inicial de API REST
 
-**Estado:** clientes y `/health` implementados. Los demás recursos siguen en diseño.
+**Estado:** clientes, equipos y `/health` implementados. Los demás recursos siguen en diseño.
 
-**Fecha:** 2026-11-25 · **Versión:** 0.2
+**Fecha:** 2026-11-25 · **Versión:** 0.3
 
 ## 1. Convenciones
 
@@ -58,9 +58,20 @@ Cada cliente se representa con `id`, `name`, `phone` y `email`. PostgreSQL gener
 - El listado se ordena por `id` ascendente. `limit` admite de 1 a 100 y por defecto vale 20. `offset` admite de 0 a 9223372036854775807 y por defecto vale 0. La respuesta es un array sin total.
 
 ### Device
-- Crear: `customer_id`, `device_type` requeridos; `brand`, `model`, `serial_number` opcionales.
-- Actualizar: solo datos descriptivos (`device_type`, `brand`, `model`, `serial_number`); **no** `customer_id`.
-- Filtrar por `customer_id`.
+
+Las rutas de equipos están temporalmente abiertas sin autenticación. Usa datos ficticios en desarrollo. Cada respuesta de equipo contiene `id`, `customer_id`, `device_type`, `brand`, `model` y `serial_number`.
+
+| Petición | Respuesta |
+|---|---|
+| `POST /api/v1/devices` | `201` con el equipo. Un cliente inexistente devuelve `404`. |
+| `GET /api/v1/devices` | `200` con una lista simple en orden ascendente de `id`. |
+| `GET /api/v1/devices/{id}` | `200` con el equipo o `404` si no existe. |
+| `PATCH /api/v1/devices/{id}` | `200` con el equipo actualizado o `404` si no existe. |
+
+- Al crear, envía el identificador del cliente como entero JSON y un tipo de equipo de 1 a 50 caracteres, por ejemplo `{"customer_id":1,"device_type":"Laptop"}`. Tanto `id` como `customer_id` tienen rango de 1 a 9223372036854775807.
+- `brand` admite hasta 80 caracteres y `model` y `serial_number` hasta 120. Son opcionales y su valor por defecto es `null`. Los textos se recortan por los extremos. Un texto opcional compuesto solo por espacios queda como `""`. Los números de serie pueden repetirse, incluso entre distintos clientes.
+- En un `PATCH`, los campos omitidos conservan su valor y `{}` devuelve el equipo sin cambios. Por ejemplo, `{"brand":null}` borra la marca. Proporcionar `id` o `customer_id` en un `PATCH` devuelve `422`, incluso si coincide con el valor actual. También se rechazan con `422` los campos desconocidos, el carácter nulo en los textos y un `device_type` vacío o nulo.
+- El filtro opcional `customer_id` se aplica antes de paginar. Por ejemplo, `GET /api/v1/devices?customer_id=1&limit=10&offset=0`. Un filtro válido sin coincidencias devuelve `200` con `[]`. El listado admite `limit` de 1 a 100 (por defecto 20) y `offset` de 0 a 9223372036854775807 (por defecto 0). Un parámetro desconocido o fuera de rango devuelve `422`.
 
 ### WorkOrder
 - Crear: `device_id`, `problem_description` requeridos. `status` se asigna en servidor (`pending`).
@@ -115,4 +126,4 @@ Se utilizará el formato estándar de errores de FastAPI (`detail`) inicialmente
 
 ## 6. Asuntos intencionadamente diferidos
 
-El listado de clientes usa una lista simple. El cuerpo de login y los detalles del token CSRF se definirán al implementar autenticación.
+Los listados de clientes y equipos usan listas simples. El cuerpo de login y los detalles del token CSRF se definirán al implementar autenticación.

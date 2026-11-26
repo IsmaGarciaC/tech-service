@@ -1,6 +1,6 @@
 # TechService
 
-TechService es una aplicación web en desarrollo para pequeños talleres de reparación de computadoras. El backend FastAPI permite registrar, listar, consultar y actualizar clientes en PostgreSQL bajo `/api/v1/customers`. Estas rutas son temporalmente accesibles sin autenticación. En desarrollo, utiliza solo datos ficticios. Consulta los cuerpos, códigos de respuesta y reglas de paginación en el [contrato REST](docs/api.md#customer).
+TechService es una aplicación web en desarrollo para pequeños talleres de reparación de computadoras. El backend FastAPI permite registrar, listar, consultar y actualizar clientes y equipos en PostgreSQL bajo `/api/v1/customers` y `/api/v1/devices`. Estas rutas son temporalmente accesibles sin autenticación. En desarrollo, utiliza solo datos ficticios. Consulta los campos y ejemplos en el [contrato REST](docs/api.md#device).
 
 ## Instalar y ejecutar el backend
 
@@ -33,14 +33,14 @@ docker compose config --quiet
 docker compose up -d --no-recreate db
 ```
 
-Para habilitar las rutas de clientes en una instalación nueva, aplica la migración desde `backend/` con el entorno virtual activo y PostgreSQL listo.
+Para habilitar las rutas de clientes y equipos, aplica las migraciones desde `backend/` con el entorno virtual activo y PostgreSQL listo.
 
 ```sh
 python -m alembic upgrade head
 python -m alembic current
 ```
 
-La primera revisión, `f511a0394d3e`, crea la tabla `customers`. Con la API en ejecución puedes consultar `curl -fsS http://127.0.0.1:8000/api/v1/customers`. Una base recién migrada devuelve `[]`.
+La revisión `f511a0394d3e` crea `customers` y la siguiente, `2c997572e58f`, añade `devices`. Con la API en ejecución, `curl -fsS 'http://127.0.0.1:8000/api/v1/devices?customer_id=1'` lista los equipos de ese cliente. Una lista sin coincidencias devuelve `[]`.
 
 ## Modelos, sesiones y migraciones
 

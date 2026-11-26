@@ -1,8 +1,8 @@
 # TechService — Arquitectura técnica
 
-**Estado:** diseño aprobado; implementación pendiente  
-**Fecha:** 2026-11-18  
-**Versión:** 0.1
+**Estado:** diseño aprobado. El backend implementa clientes y equipos con PostgreSQL y migraciones Alembic.
+
+**Fecha:** 2026-11-25 · **Versión:** 0.2
 
 ## 1. Objetivo y límites
 
