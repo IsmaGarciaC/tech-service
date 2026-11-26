@@ -3,9 +3,11 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.modules.customers.router import router as customers_router
+from app.modules.devices.router import router as devices_router
 
 app = FastAPI()
 app.include_router(customers_router, prefix="/api/v1")
+app.include_router(devices_router, prefix="/api/v1")
 
 
 @app.exception_handler(SQLAlchemyError)
